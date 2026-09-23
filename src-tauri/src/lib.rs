@@ -18,23 +18,44 @@ fn get_teacher_mapping() -> Result<String, String> {
 
 #[command]
 fn start_solver(window: Window, time_limit: u32, cpu_limit: u32) -> Result<(), String> {
-    // Run the solver in a background thread so we don't block the Tauri UI
+    // Determine available cores
+    let total_cores = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(1);
+    
+    // Calculate how many workers to use based on cpu_limit percentage
+    // Even at 10%, we should use at least 1 worker.
+    let mut workers = (total_cores as f64 * (cpu_limit as f64 / 100.0)).round() as u32;
+    if workers < 1 {
+        workers = 1;
+    }
+    
+    // Time limit in seconds
+    let max_time_seconds = time_limit * 60;
+
     thread::spawn(move || {
         let script_path = "/Users/hasanturhan/.gemini/antigravity/scratch/solver_multi.py";
         
+        let _ = window.emit("solver-log", format!(">> Sistem Analizi: Toplam Çekirdek (Mantıksal): {}", total_cores));
+        let _ = window.emit("solver-log", format!(">> Hedeflenen Güç: %{}, Atanan Çekirdek (İş Parçacığı): {}", cpu_limit, workers));
+        let _ = window.emit("solver-log", format!(">> Motor Başlatılıyor... (Zaman Limiti: {}sn)", max_time_seconds));
+
         let mut child = match Command::new("python3")
             .arg(script_path)
+            .arg("--time")
+            .arg(max_time_seconds.to_string())
+            .arg("--workers")
+            .arg(workers.to_string())
+            .arg("--out")
+            .arg("/Users/hasanturhan/.gemini/antigravity/scratch/generated_schedule.json") // We just need a dummy output target for now
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn() {
                 Ok(c) => c,
                 Err(e) => {
                     let _ = window.emit("solver-log", format!("Error starting solver: {}", e));
+                    let _ = window.emit("solver-done", format!("Hata: Çözücü başlatılamadı - {}", e));
                     return;
                 }
             };
-
-        let _ = window.emit("solver-log", format!("Yapay Zeka Motoru Başlatıldı... (Süre Limiti: {}dk, CPU: %{})", time_limit, cpu_limit));
 
         if let Some(stdout) = child.stdout.take() {
             let reader = BufReader::new(stdout);
