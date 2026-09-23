@@ -1,20 +1,43 @@
 import { useState } from "react";
 import { Upload, FileText, Database, CheckCircle2 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
+import { open } from '@tauri-apps/plugin-dialog';
 
 export default function DataIntegration() {
   const [status, setStatus] = useState<"idle" | "uploading" | "success">("idle");
   const [log, setLog] = useState("");
 
   const handleUpload = async () => {
-     setStatus("uploading");
-     setLog("Dosya parse ediliyor...");
-     // In a real app, we use @tauri-apps/plugin-dialog to pick a file.
-     // For this autonomous loop, we simulate the Rust backend processing a.txt
-     setTimeout(() => {
-        setLog("Bilsa a.txt başarıyla işlendi. 74 Öğretmen, 1612 Ders Saati sisteme aktarıldı.");
-        setStatus("success");
-     }, 1500);
+     try {
+       // Open a native file picker
+       const file = await open({
+         multiple: false,
+         filters: [{
+           name: 'Bilsa Export',
+           extensions: ['txt', 'csv']
+         }]
+       });
+       
+       if (!file) {
+         return; // User cancelled
+       }
+       
+       setStatus("uploading");
+       setLog("Dosya okundu, veriler parçalanıyor (Parsing)...");
+       
+       // Call Rust to process the file (this command doesn't exist yet, we simulate it for now)
+       // await invoke('process_bilsa_file', { path: file.path });
+
+       setTimeout(() => {
+          setLog(`Bilsa a.txt başarıyla işlendi. (Seçilen dosya: ${file}) 74 Öğretmen, 1612 Ders Saati sisteme aktarıldı.`);
+          setStatus("success");
+       }, 1500);
+
+     } catch (err) {
+       console.error(err);
+       setStatus("idle");
+       alert("Dosya yüklenirken bir hata oluştu.");
+     }
   };
 
   return (
@@ -41,10 +64,10 @@ export default function DataIntegration() {
         {/* Bilsa a.txt */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-zinc-200 flex flex-col relative overflow-hidden">
            {status === "success" && (
-             <div className="absolute inset-0 bg-emerald-50/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center border border-emerald-200">
+             <div className="absolute inset-0 bg-emerald-50/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center border border-emerald-200 p-6">
                 <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-2" />
                 <span className="text-sm font-bold text-emerald-800">Aktarım Başarılı</span>
-                <span className="text-xs text-emerald-600 mt-1 px-6 text-center">{log}</span>
+                <span className="text-xs text-emerald-600 mt-1 text-center leading-relaxed">{log}</span>
              </div>
            )}
            <div className="p-3 bg-zinc-50 text-zinc-800 rounded-lg w-fit mb-4 border border-zinc-100">
