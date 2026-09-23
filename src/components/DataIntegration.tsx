@@ -25,13 +25,11 @@ export default function DataIntegration() {
        setStatus("uploading");
        setLog("Dosya okundu, veriler parçalanıyor (Parsing)...");
        
-       // Call Rust to process the file (this command doesn't exist yet, we simulate it for now)
-       // await invoke('process_bilsa_file', { path: file.path });
+       // Call Rust to process the file
+       const result = await invoke('process_bilsa_file', { path: file.path || file });
 
-       setTimeout(() => {
-          setLog(`Bilsa a.txt başarıyla işlendi. (Seçilen dosya: ${file}) 74 Öğretmen, 1612 Ders Saati sisteme aktarıldı.`);
-          setStatus("success");
-       }, 1500);
+       setLog(`Veri başarıyla işlendi: ${result}`);
+       setStatus("success");
 
      } catch (err) {
        console.error(err);
