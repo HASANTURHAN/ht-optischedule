@@ -14,45 +14,39 @@ import {
 
 function App() {
   const [activeTab, setActiveTab] = useState("solve");
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   return (
     <div className="flex h-screen bg-[#FAFAFA] font-sans text-zinc-900 overflow-hidden">
-      {/* Sleek Sidebar (Collapsible) */}
-      <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-[240px]'} transition-all duration-300 ease-in-out bg-[#FAFAFA] border-r border-zinc-200 flex flex-col z-10 shrink-0`}>
+      {/* Sleek Sidebar (Hover to Expand) */}
+      <aside 
+        onMouseEnter={() => setIsSidebarCollapsed(false)}
+        onMouseLeave={() => setIsSidebarCollapsed(true)}
+        className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-[240px]'} transition-all duration-300 ease-in-out bg-[#FAFAFA] border-r border-zinc-200 flex flex-col z-20 shrink-0 relative`}
+      >
         <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-200 shrink-0">
-          <div className="flex items-center">
+          <div className="flex items-center overflow-hidden">
             <div className="w-6 h-6 bg-zinc-900 rounded-[4px] flex items-center justify-center shrink-0">
                <div className="w-2 h-2 bg-white rounded-full"></div>
             </div>
-            {!isSidebarCollapsed && <h1 className="text-sm font-semibold tracking-tight ml-3 whitespace-nowrap overflow-hidden">HT OptiSchedule</h1>}
+            <h1 className={`text-sm font-semibold tracking-tight ml-3 whitespace-nowrap transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>HT OptiSchedule</h1>
           </div>
         </div>
         
         <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
-          {!isSidebarCollapsed && <SectionTitle>Kurulum</SectionTitle>}
+          <SectionTitle isCollapsed={isSidebarCollapsed}>Kurulum</SectionTitle>
           <NavItem isCollapsed={isSidebarCollapsed} icon={<Database size={18} strokeWidth={2} />} label="Veri Entegrasyonu" isActive={activeTab === "data"} onClick={() => setActiveTab("data")} />
           <NavItem isCollapsed={isSidebarCollapsed} icon={<LayoutGrid size={18} strokeWidth={2} />} label="Kısıt Matrisi" isActive={activeTab === "grid"} onClick={() => setActiveTab("grid")} />
           <NavItem isCollapsed={isSidebarCollapsed} icon={<Map size={18} strokeWidth={2} />} label="Derslik Ağacı" isActive={activeTab === "rooms"} onClick={() => setActiveTab("rooms")} />
           
-          {!isSidebarCollapsed && <SectionTitle>Motor</SectionTitle>}
+          <SectionTitle isCollapsed={isSidebarCollapsed}>Motor</SectionTitle>
           <NavItem isCollapsed={isSidebarCollapsed} icon={<Settings2 size={18} strokeWidth={2} />} label="AI Motoru" isActive={activeTab === "solve"} onClick={() => setActiveTab("solve")} />
           <NavItem isCollapsed={isSidebarCollapsed} icon={<MousePointer2 size={18} strokeWidth={2} />} label="Manuel Rötuş" isActive={activeTab === "editor"} onClick={() => setActiveTab("editor")} />
           
-          {!isSidebarCollapsed && <SectionTitle>Rapor</SectionTitle>}
+          <SectionTitle isCollapsed={isSidebarCollapsed}>Rapor</SectionTitle>
           <NavItem isCollapsed={isSidebarCollapsed} icon={<BarChart size={18} strokeWidth={2} />} label="İstatistikler" isActive={activeTab === "results"} onClick={() => setActiveTab("results")} />
           <NavItem isCollapsed={isSidebarCollapsed} icon={<Share size={18} strokeWidth={2} />} label="Dışa Aktarım" isActive={activeTab === "export"} onClick={() => setActiveTab("export")} />
         </nav>
-
-        <div className="p-3 border-t border-zinc-200 shrink-0 flex justify-center">
-          <button 
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="p-2 rounded-md hover:bg-zinc-100 text-zinc-500 transition-colors w-full flex justify-center"
-            title={isSidebarCollapsed ? "Menüyü Genişlet" : "Menüyü Daralt"}
-          >
-            {isSidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-          </button>
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -95,8 +89,9 @@ function App() {
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <div className="text-[10px] font-bold text-zinc-400 mt-6 mb-2 px-2 uppercase tracking-wider">{children}</div>;
+function SectionTitle({ children, isCollapsed }: { children: React.ReactNode, isCollapsed: boolean }) {
+  if (isCollapsed) return <div className="h-6 w-full"></div>;
+  return <div className="text-[10px] font-bold text-zinc-400 mt-6 mb-2 px-2 uppercase tracking-wider whitespace-nowrap overflow-hidden">{children}</div>;
 }
 
 function NavItem({ icon, label, isActive, isCollapsed, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, isCollapsed: boolean, onClick: () => void }) {
