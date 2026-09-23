@@ -6,6 +6,7 @@ import DutySettings from "./components/DutySettings";
 import ResultsDashboard from "./components/ResultsDashboard";
 import AdvancedEditor from "./components/AdvancedEditor";
 import IntegrationExport from "./components/IntegrationExport";
+import DataIntegration from "./components/DataIntegration";
 import { 
   Database, LayoutGrid, Settings2, BarChart, 
   Map, MousePointer2, Share, CheckCircle2, ChevronRight
@@ -65,7 +66,7 @@ function App() {
 
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
           <div className="max-w-[1000px] mx-auto h-full">
-            {activeTab === "data" && <Placeholder title="Veri Entegrasyonu" />}
+            {activeTab === "data" && <div className="animate-in fade-in duration-300"><DataIntegration /></div>}
             {activeTab === "grid" && <div className="h-full pb-4 animate-in fade-in duration-300"><TeacherGrid /></div>}
             {activeTab === "rooms" && <Placeholder title="Derslik Ağacı" />}
             {activeTab === "duty" && <div className="animate-in fade-in duration-300"><DutySettings /></div>}
