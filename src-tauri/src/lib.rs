@@ -18,6 +18,23 @@ fn get_teacher_mapping() -> Result<String, String> {
 }
 
 #[command]
+fn get_generated_schedule() -> Result<String, String> {
+    // Attempt to read one of the output schedules
+    let paths = [
+        "/Users/hasanturhan/.gemini/antigravity/scratch/new_schedule.json",
+        "/Users/hasanturhan/.gemini/antigravity/scratch/vip_schedule.json",
+        "/Users/hasanturhan/.gemini/antigravity/scratch/generated_schedule.json"
+    ];
+    
+    for path in paths.iter() {
+        if let Ok(content) = fs::read_to_string(path) {
+            return Ok(content);
+        }
+    }
+    Err("Henüz oluşturulmuş bir program bulunamadı. Lütfen önce optimizasyonu çalıştırın.".to_string())
+}
+
+#[command]
 fn process_bilsa_file(window: Window, path: String) -> Result<String, String> {
     // In a real implementation, this would parse the Bilsa txt/csv file line by line
     // and convert it to the internal csv_constraints.json and teacher_mapping.json.
@@ -94,6 +111,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_teachers_data, 
             get_teacher_mapping,
+            get_generated_schedule,
             process_bilsa_file,
             start_solver
         ])
